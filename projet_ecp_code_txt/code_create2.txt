@@ -1,0 +1,38 @@
+-- Table: public.pl
+
+-- DROP TABLE IF EXISTS public.pl;
+
+CREATE TABLE IF NOT EXISTS public.pl
+(
+    gid serial PRIMARY KEY,  -- Utilisez le type serial pour générer automatiquement les valeurs
+    geom geometry(Point, 2154),
+    id bigint,
+    codecoffret varchar(9),  -- Utilisez varchar plutôt que character varying
+    codecable varchar(10),
+    datereleve varchar(29),
+    typepl integer,
+    materiau integer,
+    nblampes integer,
+    etatpl integer,
+    remarque varchar(109),
+    rue varchar(13),
+    nomrue varchar(32),
+    photo varchar(32),
+	x_wgs84 integer,
+	y_wgs84 integer,
+	x_l93 integer,
+	y_l93 integer,
+    lienstreetview varchar(32)
+);
+
+ALTER TABLE IF EXISTS public.pl
+    OWNER TO kvukrw_pqista;
+
+-- Index: sidx_pl_geom
+
+-- DROP INDEX IF EXISTS public.sidx_pl_geom;
+
+-- Créez l'index sur la colonne geom en utilisant l'extension GIST
+CREATE INDEX IF NOT EXISTS sidx_pl_geom
+    ON public.pl USING gist
+    (geom);

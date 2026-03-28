@@ -1,0 +1,39 @@
+CREATE OR REPLACE FUNCTION public.pl_insert_data()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql
+AS $BODY$
+BEGIN
+    -- Arrondir les coordonnées L93
+    NEW.x_l93 = round(ST_X(NEW.geom)::numeric, 3);
+    NEW.y_l93 = round(ST_Y(NEW.geom)::numeric, 3);
+
+    -- Reprojeter les coordonnées en WGS84 et les arrondir
+    NEW.x_wgs84 = round(ST_X(ST_Transform(NEW.geom, 4326))::numeric, 3);
+    NEW.y_wgs84 = round(ST_Y(ST_Transform(NEW.geom, 4326))::numeric, 3);
+
+    -- Remplir la colonne datereleve avec la date actuelle
+    NEW.datereleve = NOW();
+
+    -- Remplir la colonne codecoffret avec la valeur correspondante du câble le plus proche
+    NEW.codecoffret = (SELECT c.codecoffre FROM public.cable AS c
+                       ORDER BY c.geom <-> NEW.geom
+                       LIMIT 1);
+
+    -- Générer un lien street view google
+	NEW.lienstreetview = 'https://www.google.fr/maps?f=p&rl=1&ie=UTF8&layer=c&cbll='||ST_Y(ST_Transform(NEW.geom, 4326))||','||ST_X(ST_Transform(NEW.geom, 4326))||'&cbp=12,95.558,,0,-0';
+	
+	-- Remplir la colonne codecable avec la valeur correspondante du câble le plus proche
+    NEW.codecable = (SELECT ca.code FROM public.cable AS ca
+                       ORDER BY ca.geom <-> NEW.geom
+                       LIMIT 1);
+	
+	-- Remplir le nomrue avec la valeur correspondante à la route la plus proche
+	NEW.nomrue = (SELECT r.nom_voie_g FROM public.route_nommee AS r
+                       ORDER BY r.geom <-> NEW.geom
+                       LIMIT 1);
+	
+	RETURN NEW;
+	
+	
+END;
+$BODY$;

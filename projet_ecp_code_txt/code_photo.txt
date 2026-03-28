@@ -1,0 +1,20 @@
+-- Table: public.photo
+
+-- DROP TABLE IF EXISTS public.photo;
+
+CREATE TABLE IF NOT EXISTS public.photo
+(
+    gid SERIAL PRIMARY KEY,
+	photo character varying(40) COLLATE pg_catalog."default",
+    idpl integer,
+    CONSTRAINT fk_photo_idpl FOREIGN KEY (idpl)
+        REFERENCES public.pl (gid) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE,
+    CONSTRAINT fk_photo_idpl_not_null CHECK (idpl IS NOT NULL)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.photo
+    OWNER to kvukrw_pqista;
